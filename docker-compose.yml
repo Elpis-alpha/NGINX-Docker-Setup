@@ -1,0 +1,48 @@
+name: nginx-overseer
+
+services:
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./ngx/etc/nginx:/etc/nginx
+      - ./ngx/www:/var/www/html
+      - ./ngx/etc/selfsignedssl:/etc/selfsignedssl
+      - ./ngx/etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+
+  certbot-**********:
+    image: certbot/certbot
+    volumes:
+      - ./ngx/etc/nginx:/etc/nginx
+      - ./ngx/www:/var/www/html
+      - ./ngx/etc/letsencrypt:/etc/letsencrypt
+    entrypoint: >
+      sh -c "certbot certonly --webroot -w /var/www/html
+      --email email@gmail.com --agree-tos --non-interactive
+      --domains **********.com --domains www.**********.com --domains api.**********.com"
+
+  certbot-**********:
+    image: certbot/certbot
+    volumes:
+      - ./ngx/etc/nginx:/etc/nginx
+      - ./ngx/www:/var/www/html
+      - ./ngx/etc/letsencrypt:/etc/letsencrypt
+    entrypoint: >
+      sh -c "certbot certonly --webroot -w /var/www/html
+      --email elpis409@gmail.com --agree-tos --non-interactive
+      --domains **********.org --domains api-**********.org"
+
+  selfsign:
+    image: alpine/openssl
+    volumes:
+      - ./ngx/etc/selfsignedssl:/etc/selfsignedssl
+    entrypoint: "/bin/sh -c"
+    command: >
+      "mkdir -p /etc/selfsignedssl/**********.org && openssl req -x509 -nodes -days 365
+      -newkey rsa:2048
+      -keyout /etc/selfsignedssl/**********.org/privkey.pem
+      -out /etc/selfsignedssl/**********.org/fullchain.pem
+      -subj '/CN=**********.org'"
